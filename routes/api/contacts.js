@@ -1,5 +1,5 @@
 const express = require('express')
-
+const Joi = require("joi");
 const router = express.Router()
 const {
   listContacts,
@@ -8,6 +8,12 @@ const {
   addContact,
   updateContact,
 } = require("./../models/contacts");
+
+const contactSchema = Joi.object({
+  name: Joi.string().required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().required(),
+});
 
 router.get('/', async (req, res, next) => { try {
     const contacts = await listContacts();
