@@ -1,4 +1,4 @@
-const express = require('express')
+const express = require('express');
 const Joi = require("joi");
 const router = express.Router()
 const {
@@ -15,7 +15,12 @@ const contactSchema = Joi.object({
   phone: Joi.string().required(),
 });
 
-router.get('/', async (req, res, next) => { try {
+const favoriteSchema = Joi.object({
+  favorite: Joi.boolean().required(),
+});
+
+router.get('/', async (req, res, next) => {
+  try {
     const contacts = await listContacts();
     res.status(200).json(contacts);
   } catch (error) {
@@ -74,5 +79,23 @@ router.put('/:contactId', async (req, res, next) => {
     next(error);
   }
 })
+
+router.patch("/:id/favorite", async (req, res, next) => {
+  try {
+    const { error } = favoriteSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+    const updatedContact = await updateContact(req.params.id, {
+      favorite: req.body.favorite,
+    });
+    if (!updatedContact) {
+      return res.status(404).json({ message: "Not found" });
+    }
+    res.status(200).json(updatedContact);
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router
